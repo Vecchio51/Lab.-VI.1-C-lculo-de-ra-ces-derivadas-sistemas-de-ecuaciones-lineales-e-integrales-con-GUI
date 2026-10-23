@@ -40,24 +40,24 @@ def biseccion(xl, xu, coef, tol, max_iter):
     if evaluar_polinomio(xl, coef) * evaluar_polinomio(xu, coef) > 0:
         raise ValueError("El intervalo no presenta cambio de signo.") # Verifica que el intervalo tenga un cambio de signo
     
-    xr_ant = 0
+    xr_ant = 0 # Inicializa el valor anterior de xr para calcular el error aproximado
     for i in range(max_iter):
-        xr = (xl + xu) / 2
+        xr = (xl + xu) / 2 # Calcula el punto medio del intervalo
         fxr = evaluar_polinomio(xr, coef) # Evalúa el polinomio en el punto medio
         
-        ea = abs((xr - xr_ant) / xr) * 100 if xr != 0 else 0
-        if i > 0 and ea < tol:
-            return xr, i+1, ea, fxr
+        ea = abs((xr - xr_ant) / xr) * 100 if xr != 0 else 0 # Calcula el error aproximado
+        if i > 0 and ea < tol: # Verifica si el error es menor que la tolerancia
+            return xr, i+1, ea, fxr # Devuelve la raíz, el número de iteraciones, el error aproximado y el valor del polinomio en la raíz
             
         test = evaluar_polinomio(xl, coef) * fxr # evalúa el producto de los valores de la función en los extremos del intervalo y el punto medio
         if test < 0:
-            xu = xr
+            xu = xr # Actualiza el límite superior del intervalo
         elif test > 0: 
-            xl = xr 
+            xl = xr # Actualiza el límite inferior del intervalo
         else:
-            ea = 0
+            ea = 0 # Si el producto es cero, significa que se encontró una raíz exacta
             break
-        xr_ant = xr
+        xr_ant = xr # Actualiza el valor anterior de xr para la siguiente iteración
     raise ValueError("Se alcanzó el máximo de iteraciones sin converger.")
 
 #-------------------------------------------------------------------------
@@ -70,6 +70,8 @@ def derivada_centrada(x, h, coef):
     return (fx_mas_h - fx_menos_h) / (2 * h)
 
 def simpson_13_compuesta(a, b, n, coef):
+    if n % 2 != 0:
+        raise ValueError("La cantidad de segmentos (n) debe ser par.")
     #ACA SIGUE EL CODIGO PARA EL METODO DE SIMPSON 1/3 COMPUESTA, QUE CALCULA LA INTEGRAL DEFINIDA DE UN POLINOMIO
 
 
@@ -85,6 +87,7 @@ def gauss(A_input, b_input, pivoteo=False):
     #ACA SIGUE EL CODIGO PARA EL METODO DE GAUSS, QUE RESUELVE SISTEMAS DE ECUACIONES LINEALES, CON Y SIN PIVOTEO PARCIAL.
     #Si se requiere pivoteo parcial, se realiza antes de la eliminación
     #Hay que implementar la lógica de pivoteo parcial, eliminación hacia adelante y sustitución hacia atrás para obtener la solución del sistema de ecuaciones.
+
 
 #--------------------------------------------------------------------
 #Interfaz gráfica con Tkinter para el laboratorio de cálculo numérico:
