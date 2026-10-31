@@ -137,10 +137,38 @@ def gauss(A_input, b_input, pivoteo=False):
     A = [fila[:] for fila in A_input]
     b = b_input[:]
     n = len(b)
-    #ACA SIGUE EL CODIGO PARA EL METODO DE GAUSS, QUE RESUELVE SISTEMAS DE ECUACIONES LINEALES, CON Y SIN PIVOTEO PARCIAL.
-    #Si se requiere pivoteo parcial, se realiza antes de la eliminación
-    #Hay que implementar la lógica de pivoteo parcial, eliminación hacia adelante y sustitución hacia atrás para obtener la solución del sistema de ecuaciones.
+    
+    # Eliminación hacia adelante
+    for i in range(n):
+        if pivoteo:
+            # Búsqueda del mayor elemento en la columna para pivotar
+            max_row = i
+            for k in range(i + 1, n):
+                if abs(A[k][i]) > abs(A[max_row][i]):
+                    max_row = k
+            # Intercambio de filas si es necesario
+            if max_row != i:
+                A[i], A[max_row] = A[max_row], A[i]
+                b[i], b[max_row] = b[max_row], b[i]
 
+        # Detección de pivote nulo
+        if A[i][i] == 0:
+            raise ValueError(f"Pivote nulo detectado en la fila {i+1}. Seleccione 'Con pivoteo parcial' o modifique el sistema.")
+
+        # Hacer ceros debajo del pivote
+        for j in range(i + 1, n):
+            factor = A[j][i] / A[i][i]
+            for k in range(i, n):
+                A[j][k] -= factor * A[i][k]
+            b[j] -= factor * b[i]
+
+    # Sustitución hacia atrás
+    x = [0] * n
+    for i in range(n - 1, -1, -1):
+        suma = sum(A[i][j] * x[j] for j in range(i + 1, n))
+        x[i] = (b[i] - suma) / A[i][i]
+
+    return x
 
 #--------------------------------------------------------------------
 #Interfaz gráfica con Tkinter para el laboratorio de cálculo numérico:
