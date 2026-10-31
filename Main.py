@@ -224,7 +224,7 @@ class LaboratorioNumericoApp:
         self.ent_iter.insert(0, "100")
         self.ent_iter.grid(row=2, column=3, sticky="w")
         
-        self.btn_calc_raiz = tk.Button(self.frame_raiz, text="Calcular")
+        self.btn_calc_raiz = tk.Button(self.frame_raiz, text="Calcular", command=self.calcular_raiz)
         self.btn_calc_raiz.grid(row=1, column=4, rowspan=2, padx=10)
         
         self.lbl_res_raiz = tk.Label(self.frame_raiz, text="Raíz:\nIteraciones:\nError:\nf(raíz):", justify="left")
@@ -244,7 +244,7 @@ class LaboratorioNumericoApp:
         self.ent_deriv_h.insert(0, "0.1")
         self.ent_deriv_h.pack(side="left", padx=5)
         
-        self.btn_calc_deriv = tk.Button(self.frame_deriv, text="Calcular")
+        self.btn_calc_deriv = tk.Button(self.frame_deriv, text="Calcular", command=self.calcular_derivada)
         self.btn_calc_deriv.pack(side="left", padx=10)
         
         self.lbl_res_deriv = tk.Label(self.frame_deriv, text="Derivada f'(x0): ")
@@ -277,7 +277,7 @@ class LaboratorioNumericoApp:
         tk.Radiobutton(self.frame_sis, text="Sin pivoteo", variable=self.pivoteo_var, value=False).grid(row=1, column=5)
         tk.Radiobutton(self.frame_sis, text="Con pivoteo parcial", variable=self.pivoteo_var, value=True).grid(row=2, column=5)
         
-        self.btn_calc_sis = tk.Button(self.frame_sis, text="Calcular")
+        self.btn_calc_sis = tk.Button(self.frame_sis, text="Calcular", command=self.calcular_sistema)
         self.btn_calc_sis.grid(row=3, column=5)
         
         self.lbl_res_sis = tk.Label(self.frame_sis, text="x1=\nx2=\nx3=\nx4=", justify="left")
@@ -302,13 +302,79 @@ class LaboratorioNumericoApp:
         self.ent_int_n.insert(0, "2")
         self.ent_int_n.pack(side="left", padx=5)
         
-        self.btn_calc_int = tk.Button(self.frame_int, text="Calcular")
+        self.btn_calc_int = tk.Button(self.frame_int, text="Calcular", command=self.calcular_integral)
         self.btn_calc_int.pack(side="left", padx=10)
         
         self.lbl_res_int = tk.Label(self.frame_int, text="Integral definida: ")
         self.lbl_res_int.pack(side="left")
 
-# Al final del archivo, asegúrate de tener esto para que la app se ejecute:
+    # --- Métodos de ejecución ---
+    def obtener_coeficientes(self):
+        return [float(e.get()) for e in self.coef_entries][::-1] # Invierte para que el índice coincida con el grado
+
+    def calcular_raiz(self):
+        try:
+            coef = self.obtener_coeficientes()
+            metodo = self.metodo_raiz_var.get()
+            tol = float(self.ent_tol.get())
+            max_iter = int(self.ent_iter.get())
+            
+            if metodo == "Bisección":
+                xl = float(self.ent_xi.get())
+                xu = float(self.ent_xu.get())
+                xr, iteraciones, ea, fxr = biseccion(xl, xu, coef, tol, max_iter)
+            elif metodo == "Newton":
+                x0 = float(self.ent_xi.get())
+                xr, iteraciones, ea, fxr = newton_raphson(x0, coef, tol, max_iter)
+            elif metodo == "Secante":
+                x_menos_1 = float(self.ent_xi.get())
+                x0 = float(self.ent_xu.get())
+                xr, iteraciones, ea, fxr = secante(x_menos_1, x0, coef, tol, max_iter)
+                
+            self.lbl_res_raiz.config(text=f"Raíz: {xr:.6f}\nIteraciones: {iteraciones}\nError: {ea:.4f}%\nf(raíz): {fxr:.6e}")
+        except ValueError as e:
+            messagebox.showwarning("Aviso", str(e))
+        except Exception as e:
+            messagebox.showerror("Error", f"Verifique los datos ingresados.\nDetalle: {e}")
+
+    def calcular_derivada(self):
+        try:
+            coef = self.obtener_coeficientes()
+            x0 = float(self.ent_deriv_x0.get())
+            h = float(self.ent_deriv_h.get())
+            res = derivada_centrada(x0, h, coef)
+            self.lbl_res_deriv.config(text=f"Derivada f'(x0): {res:.6f}")
+        except Exception as e:
+            messagebox.showerror("Error", "Verifique los datos de la derivada.")
+
+    def calcular_sistema(self):
+        try:
+            A = [[float(ent.get()) for ent in fila] for fila in self.matriz_entries]
+            b = [float(ent.get()) for ent in self.b_entries]
+            pivoteo = self.pivoteo_var.get()
+            
+            x = gauss(A, b, pivoteo)
+            texto_res = "\n".join([f"x{i+1} = {val:.4f}" for i, val in enumerate(x)])
+            self.lbl_res_sis.config(text=texto_res)
+        except ValueError as e:
+            messagebox.showwarning("Aviso de Sistema", str(e))
+        except Exception as e:
+            messagebox.showerror("Error", "Verifique los coeficientes del sistema.")
+
+    def calcular_integral(self):
+        try:
+            coef = self.obtener_coeficientes()
+            a = float(self.ent_int_a.get())
+            b = float(self.ent_int_b.get())
+            n = int(self.ent_int_n.get())
+            
+            res = simpson_13_compuesta(a, b, n, coef)
+            self.lbl_res_int.config(text=f"Integral definida: {res:.6f}")
+        except ValueError as e:
+            messagebox.showwarning("Aviso", str(e))
+        except Exception as e:
+            messagebox.showerror("Error", "Verifique los datos de la integral.")
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = LaboratorioNumericoApp(root)
