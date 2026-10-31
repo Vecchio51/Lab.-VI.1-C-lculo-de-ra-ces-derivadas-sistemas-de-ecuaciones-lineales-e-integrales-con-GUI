@@ -178,4 +178,138 @@ class LaboratorioNumericoApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Laboratorio VI.1 - Cálculo Numérico")
-#ACA  SE DEFINE EL CODIGO PARA ARMAR LA INTERFAZ GRAFICA, CON LOS CAMPOS DE ENTRADA PARA LOS COEFICIENTES DEL POLINOMIO, EL METODO A UTILIZAR, Y LOS BOTONES PARA EJECUTAR EL CALCULO DE RAICES.
+        
+        # --- Frame 1: Coeficientes del polinomio ---
+        self.frame_coef = tk.LabelFrame(root, text="Coeficientes del polinomio", padx=5, pady=5)
+        self.frame_coef.pack(fill="x", padx=10, pady=5)
+        
+        self.coef_entries = []
+        valores_defecto_pol = [0, 1, 0, -8, 0, 82, -25] 
+        etiquetas_coef = ["a6", "a5", "a4", "a3", "a2", "a1", "a0"]
+        
+        for i in range(7):
+            lbl = tk.Label(self.frame_coef, text=etiquetas_coef[i])
+            lbl.grid(row=1, column=i)
+            ent = tk.Entry(self.frame_coef, width=5)
+            ent.insert(0, str(valores_defecto_pol[i]))
+            ent.grid(row=0, column=i, padx=2)
+            self.coef_entries.append(ent)
+
+        # --- Frame 2: Cálculo de una raíz ---
+        self.frame_raiz = tk.LabelFrame(root, text="Cálculo de una raíz", padx=5, pady=5)
+        self.frame_raiz.pack(fill="x", padx=10, pady=5)
+        
+        self.metodo_raiz_var = tk.StringVar(value="Bisección")
+        tk.Radiobutton(self.frame_raiz, text="Bisección", variable=self.metodo_raiz_var, value="Bisección").grid(row=0, column=0)
+        tk.Radiobutton(self.frame_raiz, text="Newton-Raphson", variable=self.metodo_raiz_var, value="Newton").grid(row=0, column=1)
+        tk.Radiobutton(self.frame_raiz, text="Secante", variable=self.metodo_raiz_var, value="Secante").grid(row=0, column=2)
+        
+        tk.Label(self.frame_raiz, text="xl / x0 / x-1:").grid(row=1, column=0, sticky="e")
+        self.ent_xi = tk.Entry(self.frame_raiz, width=8)
+        self.ent_xi.insert(0, "0")
+        self.ent_xi.grid(row=1, column=1, sticky="w")
+        
+        tk.Label(self.frame_raiz, text="xu / x0:").grid(row=1, column=2, sticky="e")
+        self.ent_xu = tk.Entry(self.frame_raiz, width=8)
+        self.ent_xu.insert(0, "1")
+        self.ent_xu.grid(row=1, column=3, sticky="w")
+        
+        tk.Label(self.frame_raiz, text="Tolerancia es (%):").grid(row=2, column=0, sticky="e")
+        self.ent_tol = tk.Entry(self.frame_raiz, width=8)
+        self.ent_tol.insert(0, "0.5")
+        self.ent_tol.grid(row=2, column=1, sticky="w")
+        
+        tk.Label(self.frame_raiz, text="Máx iter:").grid(row=2, column=2, sticky="e")
+        self.ent_iter = tk.Entry(self.frame_raiz, width=8)
+        self.ent_iter.insert(0, "100")
+        self.ent_iter.grid(row=2, column=3, sticky="w")
+        
+        self.btn_calc_raiz = tk.Button(self.frame_raiz, text="Calcular")
+        self.btn_calc_raiz.grid(row=1, column=4, rowspan=2, padx=10)
+        
+        self.lbl_res_raiz = tk.Label(self.frame_raiz, text="Raíz:\nIteraciones:\nError:\nf(raíz):", justify="left")
+        self.lbl_res_raiz.grid(row=0, column=5, rowspan=3, sticky="w")
+
+        # --- Frame 3: Derivada ---
+        self.frame_deriv = tk.LabelFrame(root, text="Cálculo de la derivada primera (diferencia centrada)", padx=5, pady=5)
+        self.frame_deriv.pack(fill="x", padx=10, pady=5)
+        
+        tk.Label(self.frame_deriv, text="x0:").pack(side="left")
+        self.ent_deriv_x0 = tk.Entry(self.frame_deriv, width=5)
+        self.ent_deriv_x0.insert(0, "1")
+        self.ent_deriv_x0.pack(side="left", padx=5)
+        
+        tk.Label(self.frame_deriv, text="dx (h):").pack(side="left")
+        self.ent_deriv_h = tk.Entry(self.frame_deriv, width=5)
+        self.ent_deriv_h.insert(0, "0.1")
+        self.ent_deriv_h.pack(side="left", padx=5)
+        
+        self.btn_calc_deriv = tk.Button(self.frame_deriv, text="Calcular")
+        self.btn_calc_deriv.pack(side="left", padx=10)
+        
+        self.lbl_res_deriv = tk.Label(self.frame_deriv, text="Derivada f'(x0): ")
+        self.lbl_res_deriv.pack(side="left")
+
+        # --- Frame 4: Sistema de Ecuaciones ---
+        self.frame_sis = tk.LabelFrame(root, text="Resolución de un sistema de 4 ecuaciones", padx=5, pady=5)
+        self.frame_sis.pack(fill="x", padx=10, pady=5)
+        self.matriz_entries = []
+        self.b_entries = []
+        
+        valores_A = [[2,2,1,-1], [2,-2,6,-4], [2,2,1,1], [1,5,-4,-2]]
+        valores_b = [5, 0, 13, -9]
+        
+        for i in range(4):
+            fila_entries = []
+            for j in range(4):
+                ent = tk.Entry(self.frame_sis, width=5)
+                ent.insert(0, str(valores_A[i][j]))
+                ent.grid(row=i+1, column=j)
+                fila_entries.append(ent)
+            self.matriz_entries.append(fila_entries)
+            
+            ent_b = tk.Entry(self.frame_sis, width=5)
+            ent_b.insert(0, str(valores_b[i]))
+            ent_b.grid(row=i+1, column=4, padx=10)
+            self.b_entries.append(ent_b)
+            
+        self.pivoteo_var = tk.BooleanVar(value=False)
+        tk.Radiobutton(self.frame_sis, text="Sin pivoteo", variable=self.pivoteo_var, value=False).grid(row=1, column=5)
+        tk.Radiobutton(self.frame_sis, text="Con pivoteo parcial", variable=self.pivoteo_var, value=True).grid(row=2, column=5)
+        
+        self.btn_calc_sis = tk.Button(self.frame_sis, text="Calcular")
+        self.btn_calc_sis.grid(row=3, column=5)
+        
+        self.lbl_res_sis = tk.Label(self.frame_sis, text="x1=\nx2=\nx3=\nx4=", justify="left")
+        self.lbl_res_sis.grid(row=1, column=6, rowspan=4, padx=10)
+
+        # --- Frame 5: Integral ---
+        self.frame_int = tk.LabelFrame(root, text="Cálculo de la integral definida (Simpson 1/3 compuesta)", padx=5, pady=5)
+        self.frame_int.pack(fill="x", padx=10, pady=5)
+        
+        tk.Label(self.frame_int, text="Límite a:").pack(side="left")
+        self.ent_int_a = tk.Entry(self.frame_int, width=5)
+        self.ent_int_a.insert(0, "0")
+        self.ent_int_a.pack(side="left", padx=5)
+        
+        tk.Label(self.frame_int, text="Límite b:").pack(side="left")
+        self.ent_int_b = tk.Entry(self.frame_int, width=5)
+        self.ent_int_b.insert(0, "2")
+        self.ent_int_b.pack(side="left", padx=5)
+        
+        tk.Label(self.frame_int, text="Segmentos (n par):").pack(side="left")
+        self.ent_int_n = tk.Entry(self.frame_int, width=5)
+        self.ent_int_n.insert(0, "2")
+        self.ent_int_n.pack(side="left", padx=5)
+        
+        self.btn_calc_int = tk.Button(self.frame_int, text="Calcular")
+        self.btn_calc_int.pack(side="left", padx=10)
+        
+        self.lbl_res_int = tk.Label(self.frame_int, text="Integral definida: ")
+        self.lbl_res_int.pack(side="left")
+
+# Al final del archivo, asegúrate de tener esto para que la app se ejecute:
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = LaboratorioNumericoApp(root)
+    root.mainloop()
