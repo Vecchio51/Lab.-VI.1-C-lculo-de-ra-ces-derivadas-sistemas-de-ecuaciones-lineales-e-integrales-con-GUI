@@ -59,7 +59,60 @@ def biseccion(xl, xu, coef, tol, max_iter):
             break
         xr_ant = xr # Actualiza el valor anterior de xr para la siguiente iteración
     raise ValueError("Se alcanzó el máximo de iteraciones sin converger.")
+def newton_raphson(x0, coef, tol, max_iter):
+    xr_ant = x0
+    for i in range(max_iter):
+        fx = evaluar_polinomio(xr_ant, coef)
+        dfx = derivada_analitica(xr_ant, coef)
+        if dfx == 0:
+            raise ValueError("Derivada nula. No se puede continuar.")
+        
+        xr = xr_ant - (fx / dfx)
+        ea = abs((xr - xr_ant) / xr) * 100 if xr != 0 else 0
+        fxr = evaluar_polinomio(xr, coef)
+        
+        if ea < tol:
+            return xr, i + 1, ea, fxr
+        xr_ant = xr
+        
+    raise ValueError("Se alcanzó el máximo de iteraciones sin converger.")
 
+def secante(x_menos_1, x0, coef, tol, max_iter):
+    for i in range(max_iter):
+        fx0 = evaluar_polinomio(x0, coef)
+        fx_menos_1 = evaluar_polinomio(x_menos_1, coef)
+        denominador = fx0 - fx_menos_1
+        
+        if denominador == 0:
+            raise ValueError("División por cero. No se puede continuar.")
+            
+        xr = x0 - fx0 * (x0 - x_menos_1) / denominador
+        ea = abs((xr - x0) / xr) * 100 if xr != 0 else 0
+        fxr = evaluar_polinomio(xr, coef)
+        
+        if ea < tol:
+            return xr, i + 1, ea, fxr
+            
+        x_menos_1 = x0
+        x0 = xr
+        
+    raise ValueError("Se alcanzó el máximo de iteraciones sin converger.")
+
+def simpson_13_compuesta(a, b, n, coef):
+    if n % 2 != 0:
+        raise ValueError("La cantidad de segmentos (n) debe ser par.")
+        
+    h = (b - a) / n
+    suma = evaluar_polinomio(a, coef) + evaluar_polinomio(b, coef)
+    
+    for i in range(1, n):
+        x_i = a + i * h
+        if i % 2 == 0:
+            suma += 2 * evaluar_polinomio(x_i, coef)
+        else:
+            suma += 4 * evaluar_polinomio(x_i, coef)
+            
+    return (h / 3) * suma
 #-------------------------------------------------------------------------
 #Funciones de derivacion y metodo de Simpson 1/3 compuesta para integrales:
 #-------------------------------------------------------------------------
